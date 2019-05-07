@@ -45,8 +45,8 @@ class Boid {
 
     } else if (dist > 0 && dist < 50) {
 
-      var m = map(dist, 25, 100, 100, 255)
-      var n = map(dist, 50, 100, 25, 150)
+      const m = map(dist, 25, 100, 100, 255)
+      const n = map(dist, 50, 100, 25, 150)
       stroke(100 - n, m - n, 100 - n)
 
     } else {

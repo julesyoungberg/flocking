@@ -180,7 +180,7 @@ function createFlock() {
 	  cent = createVector(width / 2, height / 2)
 	}
 
-	for (var i = 0; i < config.initialCount; i++) {
+	for (let i = 0; i < config.initialCount; i++) {
 		if (config.startInCircle) {
 			createBoid(
 				random(cent.x - radius, cent.x + radius),

@@ -16,7 +16,7 @@ class Boid {
     if (awt) this.awt = awt
     if (cwt) this.cwt = cwt
     if (maxSpeed) this.maxSpeed = maxSpeed
-    if (maxForce) this.maxforce = maxForce
+    if (maxForce) this.maxForce = maxForce
     if (sepDist) this.sepDist = sepDist
     if (aliDist) this.aliDist = aliDist
     if (cohDist) this.cohDist = cohDist
@@ -47,7 +47,7 @@ class Boid {
 
       var m = map(dist, 25, 100, 100, 255)
       var n = map(dist, 50, 100, 25, 150)
-      stroke(100-n, m - n, 100-n)
+      stroke(100 - n, m - n, 100 - n)
 
     } else {
 
@@ -57,7 +57,8 @@ class Boid {
     }
 
     if (dist > 0 && dist < 100) line(
-      this.position.x, this.position.y, other.position.x, other.position.y
+      this.position.x, this.position.y,
+      other.position.x, other.position.y
     )
   }
 
@@ -65,7 +66,6 @@ class Boid {
     this.flock(others, debug ? null : this.drawConnection)
     this.withinCircle()
     // this.borders()
-    // this.show()
     this.update()
     if (debug) this.show()
   }
@@ -102,8 +102,6 @@ class Boid {
     return p5.Vector.dist(this.position, other.position)
   }
 
-
-  // BOID STEERING BEHAVIOURS
   limitVelocity = () => {
     if (this.maxSpeed) this.velocity.limit(this.maxSpeed)
     return this.velocity
@@ -114,6 +112,7 @@ class Boid {
     return force
   }
 
+  // BOID STEERING BEHAVIOURS
   steer = desired => {
     const steer = p5.Vector.sub(desired, this.velocity)
     return this.limitForce(steer)
@@ -142,8 +141,7 @@ class Boid {
     })
 
     if (count > 0) {
-      sum.div(count)
-      sum.setMag(this.maxSpeed)
+      sum.div(count).setMag(this.maxSpeed)
       return this.steer(sum)
     } else {
       return sum
@@ -168,8 +166,7 @@ class Boid {
     })
 
     if (count > 0) {
-      sum.div(count)
-      sum.setMag(this.maxSpeed)
+      sum.div(count).setMag(this.maxSpeed)
       return this.steer(sum)
     } else {
       return sum
@@ -229,27 +226,5 @@ class Boid {
     }
 
     if (desired) this.applyForce(this.steer(desired))
-  }
-
-  withinRect = (d) => {
-    let desired = null
-
-    if (this.position.x < d) {
-      desired = createVector(this.maxSpeed, this.velocity.y)
-    } else if (this.position.x > width - d) {
-      desired = createVector(-this.maxSpeed, this.velocity.y)
-    }
-
-    if (this.position.y < d) {
-      desired = createVector(this.velocity.x, this.maxSpeed)
-    } else if (this.position.y > height-d) {
-      desired = createVector(this.velocity.x, -this.maxSpeed)
-    }
-
-    if (desired) {
-      desired.normalize()
-      desired.mult(this.maxSpeed)
-      this.applyForce(this.steer(desired))
-    }
   }
 }

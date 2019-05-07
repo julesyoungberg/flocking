@@ -62,10 +62,12 @@ class Boid {
     )
   }
 
-  run = (others, debug) => {
+  run = (others, { debug, withinCircle }) => {
     this.flock(others, debug ? null : this.drawConnection)
-    this.withinCircle()
-    // this.borders()
+
+    if (withinCircle) this.withinCircle()
+    else this.borders()
+
     this.update()
     if (debug) this.show()
   }

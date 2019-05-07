@@ -144,9 +144,10 @@ class Boid {
     if (count > 0) {
       sum.div(count)
       sum.setMag(this.maxSpeed)
+      return this.steer(sum)
+    } else {
+      return sum
     }
-
-    return this.steer(sum)
   }
 
   separate = (others, callback) => {
@@ -169,9 +170,10 @@ class Boid {
     if (count > 0) {
       sum.div(count)
       sum.setMag(this.maxSpeed)
+      return this.steer(sum)
+    } else {
+      return sum
     }
-
-    return this.steer(sum)
   }
 
   cohesion = (others, callback) => {

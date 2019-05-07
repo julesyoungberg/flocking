@@ -1,17 +1,17 @@
-let flock, center
+let flock
 
 // config
 const config = {
-	swt: 5,
-	awt: 4,
-	cwt: 1,
+	swt: 25,
+	awt: 5,
+	cwt: 3,
 	sepDist: 35,
 	aliDist: 25,
 	cohDist: 50,
 	maxSpeed: 2,
-	maxForce: 0.1,
-	boidSize: 3,
-	debug: true,
+	maxForce: 0.025,
+	boidSize: 2,
+	debug: false,
 	paused: false,
 }
 
@@ -31,22 +31,9 @@ const controls = {
 
 function setup() {
 	createCanvas(windowWidth, 600)
-
-	center = createVector(width/2, height/2)
 	colorMode(RGB, 255, 255, 255, 100)
 
-	flock = new Flock()
-
-	var r = (width > height ? height : width) / 2 - 500
-  var cent = createVector(width / 2, height / 2)
-
-	for (var i = 0; i < 100; i++) {
-		// to start in circle
-		// const position = createVector(
-		//   random(cent.x - r, cent.x + r), random(cent.y - r, cent.y + r)
-		// )
-		createBoid()
-	}
+	createFlock()
 
 	smooth()
 
@@ -113,14 +100,21 @@ function setup() {
 		else config.paused = false
 	})
 
-	const button = createButton('update')
-	button.position(290, 780)
-	button.mousePressed(() => {
+	const updateButton = createButton('update')
+	updateButton.position(290, 780)
+	updateButton.mousePressed(() => {
 		Object.keys(controls).forEach(key => {
 			// check for inputs with labels (not checkboxes)
 			if (controls[key].label)
 				config[key] = parseFloat(controls[key].input.value())
 		})
+	})
+
+	const resetButton = createButton('reset')
+	resetButton.position(355, 780)
+	resetButton.mousePressed(() => {
+		createFlock()
+		background(255)
 	})
 }
 
@@ -140,4 +134,17 @@ function keyPressed() {
 function createBoid(x, y) {
 	const position = createVector(x || random(0, width), y || random(0, height))
 	flock.add(new Boid(position, config))
+}
+
+function createFlock() {
+	flock = new Flock()
+	// var r = (width > height ? height : width) / 2 - 500
+  // var cent = createVector(width / 2, height / 2)
+	for (var i = 0; i < 100; i++) {
+		// to start in circle
+		// const position = createVector(
+		//   random(cent.x - r, cent.x + r), random(cent.y - r, cent.y + r)
+		// )
+		createBoid()
+	}
 }

@@ -1,6 +1,6 @@
 # Flocking
 
-Simple flocking simulation and visualization based on Craig Reynolds' steering behaviors.
+Simple flocking simulation/visualization based on Craig Reynolds' steering behaviors.
 
 Built with p5js.
 

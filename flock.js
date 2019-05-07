@@ -3,9 +3,10 @@ class Flock {
     this.boids = []
   }
 
-  run = () => {
+  run = ({ debug, ...boidConfig }) => {
     this.boids.forEach(boid => {
-      boid.run(this.boids)
+      boid.configure(boidConfig)
+      boid.run(this.boids, debug)
     })
   }
 

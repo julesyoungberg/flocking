@@ -1,15 +1,25 @@
 class Boid {
-  constructor(pos, { r, swt, awt, cwt, maxSpeed, maxForce }) {
+  constructor(pos, config) {
     this.position = pos
     this.prevPosition = pos.copy()
-    this.r = r
     this.velocity = createVector(random(-1, 1), random(-1, 1))
     this.acceleration = createVector()
-    this.swt = swt
-    this.awt = awt
-    this.cwt = cwt
-    this.maxSpeed = maxSpeed
-    this.maxforce = maxForce
+    this.configure(config)
+  }
+
+  configure = ({
+    boidSize, swt, awt, cwt, maxSpeed, maxForce,
+    sepDist, aliDist, cohDist
+  }) => {
+    if (size) this.r = boidSize
+    if (swt) this.swt = swt
+    if (awt) this.awt = awt
+    if (cwt) this.cwt = cwt
+    if (maxSpeed) this.maxSpeed = maxSpeed
+    if (maxForce) this.maxforce = maxForce
+    if (sepDist) this.sepDist = sepDist
+    if (aliDist) this.aliDist = aliDist
+    if (cohDist) this.cohDist = cohDist
   }
 
   show = () => {
@@ -28,34 +38,50 @@ class Boid {
     pop()
   }
 
-  run = (others) => {
-    this.flock(others, (dist, other) => {
-      if (dist > 0 && dist < 25) {
+  drawConnection = (dist, other) => {
+    if (dist > 0 && dist < 25) {
 
-        stroke(255, 0, 0)
+      stroke(255, 0, 0)
 
-      } else if (dist > 0 && dist < 50) {
+    } else if (dist > 0 && dist < 50) {
 
-        var m = map(dist, 25, 100, 100, 255)
-        var n = map(dist, 50, 100, 25, 150)
-        stroke(100-n, m - n, 100-n)
+      var m = map(dist, 25, 100, 100, 255)
+      var n = map(dist, 50, 100, 25, 150)
+      stroke(100-n, m - n, 100-n)
 
-      } else {
+    } else {
 
-        stroke(0)
-        strokeWeight(0.1)
+      stroke(0)
+      strokeWeight(0.1)
 
-      }
+    }
 
-      if (dist > 0 && dist < 100) line(
-        this.position.x, this.position.y, other.position.x, other.position.y
-      )
-    })
+    if (dist > 0 && dist < 100) line(
+      this.position.x, this.position.y, other.position.x, other.position.y
+    )
+  }
 
-    this.update()
+  run = (others, debug) => {
+    this.flock(others, debug ? null : this.drawConnection)
     this.withinCircle()
     // this.borders()
     // this.show()
+    this.update()
+    if (debug) this.show()
+  }
+
+  flock = (others, callback) => {
+    const sep = this.separate(others)
+    const ali = this.align(others, callback)
+    const coh = this.cohesion(others)
+
+    sep.mult(this.swt)
+    ali.mult(this.awt)
+    coh.mult(this.cwt)
+
+    this.applyForce(sep)
+    this.applyForce(ali)
+    this.applyForce(coh)
   }
 
 
@@ -100,14 +126,14 @@ class Boid {
     return this.steer(desired)
   }
 
-  align = (others, callback, neighborDist = 25) => {
+  align = (others, callback) => {
     const sum = createVector()
     let count = 0
 
     others.forEach(other => {
       const d = this.distance(other)
 
-      if (d > 0 && d < neighborDist) {
+      if (d > 0 && d < this.aliDist) {
         sum.add(other.velocity)
         count++
       }
@@ -123,14 +149,14 @@ class Boid {
     return this.steer(sum)
   }
 
-  separate = (others, callback, neighborDist = 35) => {
+  separate = (others, callback) => {
     const sum = createVector()
     let count = 0
 
     others.forEach(other => {
       const d = this.distance(other)
 
-      if (d > 0 && d < neighborDist) {
+      if (d > 0 && d < this.sepDist) {
         const diff = p5.Vector.sub(this.position, other.position)
         diff.normalize()
         sum.add(diff)
@@ -148,14 +174,14 @@ class Boid {
     return this.steer(sum)
   }
 
-  cohesion = (others, callback, neighborDist = 50) => {
+  cohesion = (others, callback) => {
     const sum = createVector()
     let count = 0
 
     others.forEach(other => {
       const d = this.distance(other)
 
-      if (d > 0 && d < neighborDist) {
+      if (d > 0 && d < this.cohDist) {
         sum.add(other.position)
         count++
       }
@@ -169,20 +195,6 @@ class Boid {
     }
 
     return sum
-  }
-
-  flock = (others, callback) => {
-    const sep = this.separate(others)
-    const ali = this.align(others, callback)
-    const coh = this.cohesion(others)
-
-    sep.mult(this.swt)
-    ali.mult(this.awt)
-    coh.mult(this.cwt)
-
-    this.applyForce(sep)
-    this.applyForce(ali)
-    this.applyForce(coh)
   }
 
 

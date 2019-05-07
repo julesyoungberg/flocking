@@ -1,14 +1,33 @@
 let flock, center
-let paused = false
-let debug = false
 
 // config
-let swt = 25.0
-let awt = 4.0
-let cwt = 5.0
-let maxSpeed = 2
-let maxForce = 0.025
-let boidSize = 1.0
+const config = {
+	swt: 5,
+	awt: 4,
+	cwt: 1,
+	sepDist: 35,
+	aliDist: 25,
+	cohDist: 50,
+	maxSpeed: 2,
+	maxForce: 0.1,
+	boidSize: 3,
+	debug: true,
+	paused: false,
+}
+
+const controls = {
+	swt: { input: null, label: null },
+	awt: { input: null, label: null },
+	cwt: { input: null, label: null },
+	sepDist: { input: null, label: null },
+	aliDist: { input: null, label: null },
+	cohDist: { input: null, label: null },
+	maxSpeed: { input: null, label: null },
+	maxForce: { input: null, label: null },
+	boidSize: { input: null, label: null },
+	debug: { input: null },
+	paused: { input: null },
+}
 
 function setup() {
 	createCanvas(windowWidth, 600)
@@ -32,60 +51,82 @@ function setup() {
 	smooth()
 
 
-	// WEIGHT CONTROL
-	const swtControl = createInput(swt, 'number')
-	swtControl.position(10, 650)
-	const swtLabel = createElement('label', 'separation weight')
-	swtLabel.position(10, 630)
+	// FLOCK CONTROL
+	controls.swt.input = createInput(config.swt, 'number')
+	controls.swt.input.position(10, 650)
+	controls.swt.label = createElement('label', 'separation weight')
+	controls.swt.label.position(10, 630)
 
-	const awtControl = createInput(awt, 'number')
-	awtControl.position(150, 650)
-	const awtLabel = createElement('label', 'alignment weight')
-	awtLabel.position(150, 630)
+	controls.awt.input = createInput(config.awt, 'number')
+	controls.awt.input.position(150, 650)
+	controls.awt.label = createElement('label', 'alignment weight')
+	controls.awt.label.position(150, 630)
 
-	const cwtControl = createInput(cwt, 'number')
-	cwtControl.position(290, 650)
-	const cwtLabel = createElement('label', 'cohesion weight')
-	cwtLabel.position(290, 630)
+	controls.cwt.input = createInput(config.cwt, 'number')
+	controls.cwt.input.position(290, 650)
+	controls.cwt.label = createElement('label', 'cohesion weight')
+	controls.cwt.label.position(290, 630)
+
+	controls.sepDist.input = createInput(config.sepDist, 'number')
+	controls.sepDist.input.position(10, 700)
+	controls.sepDist.label = createElement('label', 'separation distance')
+	controls.sepDist.label.position(10, 680)
+
+	controls.aliDist.input = createInput(config.aliDist, 'number')
+	controls.aliDist.input.position(150, 700)
+	controls.aliDist.label = createElement('label', 'alignment distance')
+	controls.aliDist.label.position(150, 680)
+
+	controls.cohDist.input = createInput(config.cohDist, 'number')
+	controls.cohDist.input.position(290, 700)
+	controls.cohDist.label = createElement('label', 'cohesion distance')
+	controls.cohDist.label.position(290, 680)
 
 	// LIMITS CONTROL
-	const msControl = createInput(maxSpeed, 'number')
-	msControl.position(10, 700)
-	const msLabel = createElement('label', 'max speed')
-	msLabel.position(10, 680)
+	controls.maxSpeed.input = createInput(config.maxSpeed, 'number')
+	controls.maxSpeed.input.position(10, 750)
+	controls.maxSpeed.label = createElement('label', 'max speed')
+	controls.maxSpeed.label.position(10, 730)
 
-	const mfControl = createInput(maxForce, 'number')
-	mfControl.position(150, 700)
-	const mfLabel = createElement('label', 'max force')
-	mfLabel.position(150, 680)
+	controls.maxForce.input = createInput(config.maxForce, 'number')
+	controls.maxForce.input.position(150, 750)
+	controls.maxForce.label = createElement('label', 'max force')
+	controls.maxForce.label.position(150, 730)
 
-	const sizeControl = createInput(boidSize, 'number')
-	sizeControl.position(290, 700)
-	const sizeLabel = createElement('label', 'boid size')
-	sizeLabel.position(290, 680)
+	controls.boidSize.input = createInput(config.boidSize, 'number')
+	controls.boidSize.input.position(290, 750)
+	controls.boidSize.label = createElement('label', 'boid size')
+	controls.boidSize.label.position(290, 730)
 
 	// GENERAL APPLICATION CONTROLS
-	const debugControl = createCheckbox('debug', debug)
-	debugControl.position(10, 730)
-	debugControl.changed(toggleDebugging)
+	controls.debug.input = createCheckbox('debug', config.debug)
+	controls.debug.input.position(10, 780)
+	controls.debug.input.changed(function() {
+		if (this.checked()) config.debug = true
+		else config.debug = false
+	})
 
-	const pauseControl = createCheckbox('pause', paused)
-	pauseControl.position(150, 730)
-	pauseControl.changed(togglePaused)
-}
+	controls.paused.input = createCheckbox('pause', config.paused)
+	controls.paused.input.position(150, 780)
+	controls.paused.input.changed(function() {
+		if (this.checked()) config.paused = true
+		else config.paused = false
+	})
 
-function toggleDebugging() {
-	if (this.checked()) debug = true
-	else debug = false
-}
-
-function togglePaused() {
-	if (this.checked()) paused = true
-	else paused = false
+	const button = createButton('update')
+	button.position(290, 780)
+	button.mousePressed(() => {
+		Object.keys(controls).forEach(key => {
+			// check for inputs with labels (not checkboxes)
+			if (controls[key].label)
+				config[key] = parseFloat(controls[key].input.value())
+		})
+	})
 }
 
 function draw() {
-	if (!paused) flock.run()
+	if (config.debug) background(255)
+	if (!config.paused) flock.run(config)
 }
 
 function mouseDragged() {
@@ -93,19 +134,10 @@ function mouseDragged() {
 }
 
 function keyPressed() {
-	if (key == 'P') {
-		running = !running
-	}
+	if (key == 'P') config.paused = !config.paused
 }
 
 function createBoid(x, y) {
 	const position = createVector(x || random(0, width), y || random(0, height))
-	flock.add(new Boid(position, {
-		r: 1.0,
-		swt,
-		awt,
-		cwt,
-		maxSpeed,
-		maxForce,
-	}))
+	flock.add(new Boid(position, config))
 }
